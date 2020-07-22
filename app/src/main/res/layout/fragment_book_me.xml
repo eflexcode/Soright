@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.BookMeFragment">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.denzcoskun.imageslider.ImageSlider
+                android:id="@+id/image_slider"
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                app:iss_auto_cycle="true"
+                app:iss_corner_radius="5"
+                app:iss_delay="0"
+                app:iss_error_image="@drawable/whitebackground"
+                app:iss_period="2500"
+                app:iss_placeholder="@drawable/whitebackground" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:elevation="16dp"
+                android:layout_marginBottom="6dp"
+                android:background="#fff"
+                android:layout_below="@id/image_slider"
+                app:tabIndicatorColor="@color/colorPrimary"
+                app:tabTextColor="@color/colorPrimary" />
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/paggerV"
+                android:layout_width="match_parent"
+                android:layout_height="600dp"
+                android:layout_below="@id/tab_layout" />
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+
+
+    <!--    <androidx.core.widget.NestedScrollView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent">-->
+
+    <!--        <RelativeLayout-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="match_parent">-->
+
+    <!--            <TextView-->
+    <!--                android:id="@+id/platinum_plan"-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:padding="5dp"-->
+    <!--                android:text="Platinum plan 1 million "-->
+    <!--                android:textAppearance="@style/TextAppearance.AppCompat.Large.Inverse"-->
+    <!--                android:textColor="#0C0C0C"-->
+    <!--                android:textSize="24sp"-->
+    <!--                android:textStyle="normal" />-->
+
+    <!--            <ImageView-->
+    <!--                android:id="@+id/p_one"-->
+    <!--                android:layout_width="30dp"-->
+    <!--                android:layout_height="50dp"-->
+    <!--                android:layout_below="@id/platinum_plan"-->
+    <!--                android:padding="5dp"-->
+    <!--                android:src="@drawable/ic_platinume" />-->
+
+    <!--            <TextView-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="match_parent"-->
+    <!--                android:layout_below="@id/platinum_plan"-->
+    <!--                android:layout_toEndOf="@id/p_one"-->
+    <!--                android:paddingTop="10dp"-->
+    <!--                android:text="one camera "-->
+    <!--                android:textColor="#050505"-->
+    <!--                android:textSize="20sp" />-->
+
+
+    <!--            <ImageView-->
+    <!--                android:id="@+id/p_two"-->
+    <!--                android:layout_width="30dp"-->
+    <!--                android:layout_height="50dp"-->
+    <!--                android:layout_below="@id/p_one"-->
+    <!--                android:padding="5dp"-->
+    <!--                android:src="@drawable/ic_platinume" />-->
+
+    <!--            <TextView-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="match_parent"-->
+    <!--                android:layout_below="@id/p_one"-->
+    <!--                android:layout_toEndOf="@id/p_two"-->
+    <!--                android:paddingTop="10dp"-->
+    <!--                android:text="one camera "-->
+    <!--                android:textColor="#050505"-->
+    <!--                android:textSize="20sp" />-->
+
+    <!--            <TextView-->
+    <!--                android:id="@+id/text"-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="match_parent"-->
+    <!--                android:layout_below="@id/p_two"-->
+    <!--                android:paddingTop="10dp"-->
+    <!--                android:text="All for 1 million"-->
+    <!--                android:gravity="center"-->
+    <!--                android:textColor="@color/colorPrimaryDark"-->
+    <!--                android:textSize="20sp" />-->
+
+    <!--            <Button-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_below="@id/text"-->
+    <!--                android:layout_marginTop="10dp"-->
+    <!--                android:layout_marginStart="20dp"-->
+    <!--                android:layout_marginEnd="20dp"-->
+    <!--                android:background="@drawable/login_btn_background"-->
+    <!--                android:text="Book now for 1M"-->
+    <!--                android:textColor="#fff"-->
+    <!--                android:textSize="23sp" />-->
+
+    <!--        </RelativeLayout>-->
+
+    <!--    </androidx.core.widget.NestedScrollView>-->
+
+</RelativeLayout>
