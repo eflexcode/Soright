@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MessageActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/sendBottom">
+
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_send_blue"
+            android:id="@+id/send"
+            android:layout_alignParentEnd="true"
+            android:background="@android:color/transparent"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="150dp"
+            android:textSize="17sp"
+            android:textColor="#000"
+            android:layout_toEndOf="@id/pick_image"
+            android:layout_toStartOf="@id/send"
+            android:text="my guy afa na"/>
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/pick_image"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_image_pick"/>
+
+    </RelativeLayout>
+</RelativeLayout>

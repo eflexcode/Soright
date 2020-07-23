@@ -9,6 +9,8 @@ import com.eflexsoft.soright.fragments.BookMeFragment;
 import com.eflexsoft.soright.fragments.DiamondFragment;
 import com.eflexsoft.soright.fragments.GoldFragment;
 import com.eflexsoft.soright.fragments.HomeFragment;
+import com.eflexsoft.soright.fragments.MessageFragment;
+import com.eflexsoft.soright.fragments.NotificationFragment;
 import com.eflexsoft.soright.fragments.SilverFragment;
 
 import dagger.Module;
@@ -46,5 +48,11 @@ public abstract class ActivityFragmentModel  {
 
     @ContributesAndroidInjector
     abstract PlaceOrderActivity placeOrderActivity();
+
+    @ContributesAndroidInjector
+    abstract NotificationFragment notificationFragment();
+
+    @ContributesAndroidInjector
+    abstract MessageFragment messageFragment();
 
 }
