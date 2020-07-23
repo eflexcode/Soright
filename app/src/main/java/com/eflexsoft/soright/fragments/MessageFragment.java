@@ -4,16 +4,20 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.eflexsoft.soright.R;
 import com.eflexsoft.soright.adapter.CategoryAdapter;
+import com.eflexsoft.soright.adapter.ChatLisAdapter;
 import com.eflexsoft.soright.model.ChatList;
 import com.eflexsoft.soright.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,12 +41,40 @@ public class MessageFragment extends DaggerFragment {
     @Inject
     FirebaseDatabase firebaseDatabase;
 
+    @Inject
     FirebaseAuth firebaseAuth;
 
     AVLoadingIndicatorView avLoadingIndicatorView;
 
     List<ChatList> chatListList = new ArrayList<>();
     List<User> userList = new ArrayList<>();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        try {
+            DatabaseReference databaseReference = firebaseDatabase.getReference("ChatList")
+                    .child(firebaseAuth.getCurrentUser().getUid());
+            databaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    chatListList.clear();
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        ChatList chatList = dataSnapshot.getValue(ChatList.class);
+                        chatListList.add(chatList);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }catch (Exception e){
+            Toast.makeText(getContext(), "your not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,27 +84,41 @@ public class MessageFragment extends DaggerFragment {
         recyclerView = view.findViewById(R.id.messageRecyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        ChatLisAdapter chatLisAdapter = new ChatLisAdapter(getContext());
+        recyclerView.setAdapter(chatLisAdapter);
 
         avLoadingIndicatorView = view.findViewById(R.id.progress);
         avLoadingIndicatorView.setVisibility(View.VISIBLE);
 
-        DatabaseReference databaseReference = firebaseDatabase.getReference("ChatList")
-                .child(firebaseAuth.getCurrentUser().getUid());
+        try {
+            DatabaseReference userReference = firebaseDatabase.getReference("Admins");
+            userReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    userList.clear();
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                        User user = dataSnapshot.getValue(User.class);
+                        for (ChatList chatList : chatListList){
+                            assert user != null;
+                            if (chatList.getId().equals(user.getId())) {
+                                userList.add(user);
+                            }
+                            chatLisAdapter.setUserList(userList);
+                        }
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    ChatList chatList = dataSnapshot.getValue(ChatList.class);
-                    chatListList.add(chatList);
+                    }
+
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }catch (Exception e){
+            Toast.makeText(getContext(), "your not logged in", Toast.LENGTH_SHORT).show();
+        }
+
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -98,4 +144,6 @@ public class MessageFragment extends DaggerFragment {
 
         return view;
     }
+
+
 }
