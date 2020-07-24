@@ -80,6 +80,7 @@ public class NotificationFragment extends DaggerFragment {
                            }
                        });
                AlertDialog alertDialog = builder.create();
+               alertDialog.show();
 
            }
        });
