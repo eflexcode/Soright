@@ -5,11 +5,13 @@ public class User {
     private String name;
     private String imageUrl;
     private String id;
+    private String lastMessage;
 
-    public User(String name, String imageUrl, String id) {
+    public User(String name, String imageUrl, String id,String lastMessage) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.id = id;
+        this.lastMessage = lastMessage;
     }
 
     public User() {
@@ -37,5 +39,13 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 }

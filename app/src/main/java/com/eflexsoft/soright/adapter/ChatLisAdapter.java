@@ -1,6 +1,7 @@
 package com.eflexsoft.soright.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.eflexsoft.soright.MessageActivity;
 import com.eflexsoft.soright.R;
 import com.eflexsoft.soright.model.User;
 
@@ -43,7 +45,16 @@ public class ChatLisAdapter extends RecyclerView.Adapter<ChatLisAdapter.ViewHold
         }else {
             Glide.with(context).load(user.getImageUrl()).into(holder.proPic);
         }
-        holder.last.setText("i still they do this part");
+        holder.last.setText(user.getLastMessage());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                context.startActivity(new Intent(context, MessageActivity.class).putExtra("id",user.getId())
+                .putExtra("name",user.getName())
+                .putExtra("image",user.getImageUrl()));
+            }
+        });
 
     }
 

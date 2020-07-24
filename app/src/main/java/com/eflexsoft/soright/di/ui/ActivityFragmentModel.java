@@ -2,6 +2,7 @@ package com.eflexsoft.soright.di.ui;
 
 import com.eflexsoft.soright.LoginActivity;
 import com.eflexsoft.soright.MainActivity;
+import com.eflexsoft.soright.MessageActivity;
 import com.eflexsoft.soright.PlaceOrderActivity;
 import com.eflexsoft.soright.SignUpActivity;
 import com.eflexsoft.soright.SplashActivity;
@@ -54,5 +55,8 @@ public abstract class ActivityFragmentModel  {
 
     @ContributesAndroidInjector
     abstract MessageFragment messageFragment();
+
+    @ContributesAndroidInjector
+    abstract MessageActivity messageActivity();
 
 }

@@ -30,6 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:elevation="16dp"
+                app:tabRippleColor="@color/colorPrimary"
                 android:layout_marginBottom="6dp"
                 android:background="#fff"
                 android:layout_below="@id/image_slider"
