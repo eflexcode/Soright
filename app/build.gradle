@@ -73,6 +73,9 @@ dependencies {
 
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"

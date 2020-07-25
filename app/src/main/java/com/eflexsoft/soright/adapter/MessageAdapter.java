@@ -86,9 +86,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public void setMessageList(List<Message> messageList) {
         this.messageList = messageList;
+      notifyDataSetChanged();
+    }
+    public void setMessageListupdate(List<Message> messageList) {
+        this.messageList = messageList;
        notifyDataSetChanged();
     }
-
     @Override
     public int getItemCount() {
         return messageList.size();

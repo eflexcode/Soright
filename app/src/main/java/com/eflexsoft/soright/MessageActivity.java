@@ -2,8 +2,10 @@ package com.eflexsoft.soright;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ public class MessageActivity extends DaggerAppCompatActivity {
     ImageButton send;
     CircleImageView propic;
     TextView name;
+    SwipeRefreshLayout swipeRefreshLayout;
 
 
     @Inject
@@ -54,6 +58,8 @@ public class MessageActivity extends DaggerAppCompatActivity {
     Intent intent;
     String username;
     String imageUrl;
+
+    int size = 50;
 
     List<Message> messageList = new ArrayList<>();
 
@@ -71,6 +77,7 @@ public class MessageActivity extends DaggerAppCompatActivity {
         send = findViewById(R.id.send);
         name = findViewById(R.id.username);
         propic = findViewById(R.id.Pro_pic);
+        swipeRefreshLayout = findViewById(R.id.swipe);
 
         intent = getIntent();
         id = intent.getStringExtra("id");
@@ -114,7 +121,7 @@ public class MessageActivity extends DaggerAppCompatActivity {
             }
         });
 
-        DatabaseReference databaseReference = firebaseDatabase.getReference("Message").child(firebaseAuth.getCurrentUser().getUid());
+        Query databaseReference = firebaseDatabase.getReference("Message").child(firebaseAuth.getCurrentUser().getUid()).limitToLast(size);
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -132,6 +139,37 @@ public class MessageActivity extends DaggerAppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorPrimary));
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                size = size + 50;
+
+                Query databaseReference = firebaseDatabase.getReference("Message").child(firebaseAuth.getCurrentUser().getUid()).limitToLast(size);
+                databaseReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        messageList.clear();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Message message = dataSnapshot.getValue(Message.class);
+                            if (message.getSenderId().equals(firebaseAuth.getCurrentUser().getUid()) && message.getReceiverId().equals(id)
+                                    || message.getSenderId().equals(id) && message.getReceiverId().equals(firebaseAuth.getCurrentUser().getUid())) {
+                                messageList.add(message);
+                            }
+                            messageAdapter.setMessageListupdate(messageList);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -166,6 +204,37 @@ public class MessageActivity extends DaggerAppCompatActivity {
         messageText.setText("");
 
     }
+
+//    static class MessageDiffUtil extends DiffUtil.Callback {
+//
+//        List<Message> oldMessage;
+//        List<Message> newMessage;
+//
+//        public MessageDiffUtil(List<Message> oldMessage, List<Message> newMessage) {
+//            this.oldMessage = oldMessage;
+//            this.newMessage = newMessage;
+//        }
+//
+//        @Override
+//        public int getOldListSize() {
+//            return oldMessage.size();
+//        }
+//
+//        @Override
+//        public int getNewListSize() {
+//            return newMessage.size();
+//        }
+//
+//        @Override
+//        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+//            return oldMessage.get(oldItemPosition).getMessage().equals(newMessage.get(newItemPosition).getMessage());
+//        }
+//
+//        @Override
+//        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+//            return false;
+//        }
+//    }
 
     public void finish(View view) {
         finish();
