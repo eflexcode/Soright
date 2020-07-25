@@ -1,6 +1,9 @@
 package com.eflexsoft.soright;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,11 +17,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.eflexsoft.soright.adapter.MessageAdapter;
+import com.eflexsoft.soright.model.Message;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -44,11 +55,17 @@ public class MessageActivity extends DaggerAppCompatActivity {
     String username;
     String imageUrl;
 
+    List<Message> messageList = new ArrayList<>();
+
+    RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setStatusBarColor(getResources().getColor(R.color.colorAccent));
         setContentView(R.layout.activity_message);
+
+        recyclerView = findViewById(R.id.messageRecycler);
 
         messageText = findViewById(R.id.messageText);
         send = findViewById(R.id.send);
@@ -62,9 +79,16 @@ public class MessageActivity extends DaggerAppCompatActivity {
 
         name.setText(username);
 
-        if (imageUrl.equals("default")){
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+
+        MessageAdapter messageAdapter = new MessageAdapter(this, imageUrl);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(messageAdapter);
+
+        if (imageUrl.equals("default")) {
             propic.setImageResource(R.drawable.no_p);
-        }else {
+        } else {
             Glide.with(this).load(imageUrl).into(propic);
         }
 
@@ -90,13 +114,34 @@ public class MessageActivity extends DaggerAppCompatActivity {
             }
         });
 
+        DatabaseReference databaseReference = firebaseDatabase.getReference("Message").child(firebaseAuth.getCurrentUser().getUid());
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                messageList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Message message = dataSnapshot.getValue(Message.class);
+                    if (message.getSenderId().equals(firebaseAuth.getCurrentUser().getUid()) && message.getReceiverId().equals(id)
+                            || message.getSenderId().equals(id) && message.getReceiverId().equals(firebaseAuth.getCurrentUser().getUid())) {
+                        messageList.add(message);
+                    }
+                    messageAdapter.setMessageList(messageList);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     public void sendMessage(View view) {
 
         String getMessage = messageText.getText().toString();
 
-        if(getMessage.isEmpty()){
+        if (getMessage.isEmpty()) {
             Toast.makeText(this, "cannot send empty message !", Toast.LENGTH_SHORT).show();
             return;
         }
