@@ -1,17 +1,27 @@
 package com.eflexsoft.soright;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +31,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.eflexsoft.soright.adapter.MessageAdapter;
 import com.eflexsoft.soright.model.Message;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,10 +42,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -53,6 +71,9 @@ public class MessageActivity extends DaggerAppCompatActivity {
 
     @Inject
     FirebaseDatabase firebaseDatabase;
+    StorageReference reference;
+
+    ValueEventListener valueEventListenerIsSeen;
 
     String id;
     Intent intent;
@@ -61,9 +82,16 @@ public class MessageActivity extends DaggerAppCompatActivity {
 
     int size = 50;
 
+    Uri uploadUri;
+    AlertDialog alertDialog;
+
+    ValueEventListener valueEventListener;
+    DatabaseReference setiseen;
+
     List<Message> messageList = new ArrayList<>();
 
     RecyclerView recyclerView;
+    MessageAdapter messageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +116,9 @@ public class MessageActivity extends DaggerAppCompatActivity {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
-
-        MessageAdapter messageAdapter = new MessageAdapter(this, imageUrl);
         recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(messageAdapter);
+
+        reference = FirebaseStorage.getInstance().getReference("SendImages");
 
         if (imageUrl.equals("default")) {
             propic.setImageResource(R.drawable.no_p);
@@ -131,9 +158,13 @@ public class MessageActivity extends DaggerAppCompatActivity {
                     if (message.getSenderId().equals(firebaseAuth.getCurrentUser().getUid()) && message.getReceiverId().equals(id)
                             || message.getSenderId().equals(id) && message.getReceiverId().equals(firebaseAuth.getCurrentUser().getUid())) {
                         messageList.add(message);
+                        messageAdapter = new MessageAdapter(messageList, MessageActivity.this, imageUrl);
+                        recyclerView.setAdapter(messageAdapter);
                     }
-                    messageAdapter.setMessageList(messageList);
+//                    messageAdapter = new MessageAdapter(messageList, MessageActivity.this, imageUrl);
+//                    recyclerView.setAdapter(messageAdapter);
                 }
+
             }
 
             @Override
@@ -172,7 +203,60 @@ public class MessageActivity extends DaggerAppCompatActivity {
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
+        setiseen = firebaseDatabase.getReference("Message").child(id);
+        valueEventListener =  setiseen.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Message message = dataSnapshot.getValue(Message.class);
+                    if (message.getSenderId().equals(firebaseAuth.getCurrentUser().getUid()) && message.getReceiverId().equals(id)
+                            || message.getSenderId().equals(id) && message.getReceiverId().equals(firebaseAuth.getCurrentUser().getUid())) {
+                        HashMap<String,Object> hashMap = new HashMap<>();
+                        hashMap.put("isSeen", "yes");
+                        dataSnapshot.getRef().updateChildren(hashMap);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        setiseen.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        valueEventListener =  setiseen.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Message message = dataSnapshot.getValue(Message.class);
+                    if (message.getSenderId().equals(firebaseAuth.getCurrentUser().getUid()) && message.getReceiverId().equals(id)
+                            || message.getSenderId().equals(id) && message.getReceiverId().equals(firebaseAuth.getCurrentUser().getUid())) {
+                        HashMap<String,Object> hashMap = new HashMap<>();
+                        hashMap.put("isSeen", "yes");
+                        dataSnapshot.getRef().updateChildren(hashMap);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public void sendMessage(View view) {
@@ -197,6 +281,14 @@ public class MessageActivity extends DaggerAppCompatActivity {
         DatabaseReference databaseReference2 = firebaseDatabase.getReference("Message")
                 .child(id);
 
+        DatabaseReference sendLast1 = firebaseDatabase.getReference("Admins").child(id);
+        DatabaseReference sendLast2 = firebaseDatabase.getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("lastMessage", getMessage);
+        sendLast1.updateChildren(map);
+        sendLast2.updateChildren(map);
+
         databaseReference1.push().setValue(messageMap);
 
         databaseReference2.push().setValue(messageMap);
@@ -205,38 +297,118 @@ public class MessageActivity extends DaggerAppCompatActivity {
 
     }
 
-//    static class MessageDiffUtil extends DiffUtil.Callback {
-//
-//        List<Message> oldMessage;
-//        List<Message> newMessage;
-//
-//        public MessageDiffUtil(List<Message> oldMessage, List<Message> newMessage) {
-//            this.oldMessage = oldMessage;
-//            this.newMessage = newMessage;
-//        }
-//
-//        @Override
-//        public int getOldListSize() {
-//            return oldMessage.size();
-//        }
-//
-//        @Override
-//        public int getNewListSize() {
-//            return newMessage.size();
-//        }
-//
-//        @Override
-//        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-//            return oldMessage.get(oldItemPosition).getMessage().equals(newMessage.get(newItemPosition).getMessage());
-//        }
-//
-//        @Override
-//        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-//            return false;
-//        }
-//    }
 
     public void finish(View view) {
         finish();
     }
+
+    public void sendImage(View view) {
+
+        getPhoto();
+
+    }
+
+    public void getPhoto() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, 1);
+
+    }
+
+    private String getMineType(Uri uri) {
+
+        ContentResolver contentResolver = getContentResolver();
+
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+
+        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            assert data != null;
+
+            uploadUri = data.getData();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setMessage("Confirm Send")
+                    .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            Toast.makeText(MessageActivity.this, "Sending...", Toast.LENGTH_SHORT).show();
+                            doSendImage();
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            imageUrl = null;
+                        }
+                    });
+            alertDialog = builder.create();
+            alertDialog.show();
+        }
+
+    }
+
+    void doSendImage() {
+        StorageReference storageReference = reference.child(getMineType(uploadUri) + "." + System.currentTimeMillis());
+        UploadTask uploadTask = storageReference.putFile(uploadUri);
+        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+
+                return storageReference.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+
+                    String getDownloadUrl = task.getResult().toString();
+
+                    HashMap<String, Object> messageMap = new HashMap<>();
+                    messageMap.put("senderId", firebaseAuth.getCurrentUser().getUid());
+                    messageMap.put("receiverId", id);
+                    messageMap.put("imageUrl", getDownloadUrl);
+                    messageMap.put("isSeen", "no");
+                    messageMap.put("message", "");
+
+                    DatabaseReference databaseReference1 = firebaseDatabase.getReference("Message")
+                            .child(firebaseAuth.getCurrentUser().getUid());
+
+                    DatabaseReference databaseReference2 = firebaseDatabase.getReference("Message")
+                            .child(id);
+
+                    databaseReference1.push().setValue(messageMap);
+
+                    databaseReference2.push().setValue(messageMap);
+
+                    DatabaseReference sendLast1 = firebaseDatabase.getReference("Admins").child(id);
+                    DatabaseReference sendLast2 = firebaseDatabase.getReference("Users").child(firebaseAuth.getCurrentUser().getUid());
+
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("lastMessage", "sent an image");
+                    sendLast1.updateChildren(map);
+                    sendLast2.updateChildren(map);
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MessageActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
 }

@@ -127,7 +127,7 @@ public class PlaceOrderActivity extends DaggerAppCompatActivity {
 
         if (getEmail.isEmpty() || getEPhoneNumber.isEmpty() || getStartDate.isEmpty() || getEndDate.isEmpty()) {
             Toast.makeText(this, "A filed is missing", Toast.LENGTH_SHORT).show();
-        } else if (getEPhoneNumber.length() != 8) {
+        } else if (getEPhoneNumber.length() != 11) {
             Toast.makeText(this, "Incorrect phone number or not a nigerian phone number", Toast.LENGTH_SHORT).show();
         } else {
 
