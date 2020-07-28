@@ -2,8 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item android:title="About Sorigth" />
-    <item android:title="About app developer" />
+    <item android:title="About Sorigth"
+        android:id="@+id/about_soright"/>
+    <item android:title="About app"
+        android:id="@+id/about_app"/>
+    <item android:title="About app developer" android:id="@+id/About_app_developer" />
     <item
         android:id="@+id/sign_out"
         android:title="Logout" />

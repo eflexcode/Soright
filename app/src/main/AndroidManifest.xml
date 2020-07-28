@@ -10,17 +10,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".AboutDeveloperActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme"/>
         <activity
             android:name=".MessageActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/MainActivityTheme"/>
+            android:theme="@style/MainActivityTheme" />
         <activity
             android:name=".PlaceOrderActivity"
             android:screenOrientation="portrait"
             android:theme="@style/MainActivityTheme" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".FullImageActivity" />
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".SignUpActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".FullImageActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".SplashActivity"
             android:screenOrientation="portrait">

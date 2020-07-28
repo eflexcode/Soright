@@ -1,10 +1,13 @@
 package com.eflexsoft.soright;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -46,7 +49,6 @@ public class MainActivity extends DaggerAppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         frameLayout = findViewById(R.id.main_frame);
         setSupportActionBar(toolbar);
-
 
         if (savedInstanceState == null) {
             setTitle("Home");
@@ -101,8 +103,27 @@ public class MainActivity extends DaggerAppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sign_out:
                 firebaseAuth.signOut();
+                Toast.makeText(this, "yor logged out", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.about_app:
+                showAboutAppDialog();
+                break;
+            case R.id.About_app_developer:
+                startActivity(new Intent(MainActivity.this,AboutDeveloperActivity.class));
         }
         return true;
+    }
+
+    private void showAboutAppDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setMessage("The app if quiet self explanatory, but in case you open the app and you did not see any photo in the home view click home button again or try scrolling up and down ")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+      AlertDialog  alertDialog = builder.create();
+      alertDialog.show();
     }
 }
